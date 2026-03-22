@@ -1,14 +1,17 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { supabase, type DetectedFile, type Scan } from './supabase'
+  import type { DetectedFile, Scan } from './types'
 
-  export let scanId: string
+  interface Props {
+    scanId: string;
+  }
+  let { scanId }: Props = $props();
 
-  let files: DetectedFile[] = []
-  let scan: Scan | null = null
-  let loading = true
-  let selectedCategory = 'all'
-  let searchQuery = ''
+  let files: DetectedFile[] = $state([]);
+  let scan: Scan | null = $state(null);
+  let loading = $state(true);
+  let selectedCategory = $state('all');
+  let searchQuery = $state('');
 
   const categoryColors: Record<string, string> = {
     duplicates: 'bg-yellow-500/20 text-yellow-400 border-yellow-400/30',
@@ -35,23 +38,23 @@
   async function loadData() {
     loading = true
     try {
-      const { data: scanData, error: scanError } = await supabase
-        .from('scans')
-        .select('*')
-        .eq('id', scanId)
-        .single()
+      // Simula el tiempo de carga/fetch local
+      await new Promise(resolve => setTimeout(resolve, 500))
 
-      if (scanError) throw scanError
-      scan = scanData
-
-      const { data: filesData, error: filesError } = await supabase
-        .from('detected_files')
-        .select('*')
-        .eq('scan_id', scanId)
-        .order('file_size_mb', { ascending: false })
-
-      if (filesError) throw filesError
-      files = filesData || []
+      scan = {
+        id: scanId,
+        user_id: 'local-user',
+        scan_date: new Date().toISOString(),
+        total_files: 300,
+        total_size_gb: 1.5,
+        waste_files: 50,
+        waste_size_gb: 0.8,
+        co2_saved_estimate_g: 100,
+        source_type: 'local',
+        created_at: new Date().toISOString()
+      }
+      
+      files = [] // Simula que no hay archivos detectados todavía
     } catch (err) {
       console.error('Error loading data:', err)
     } finally {
@@ -59,23 +62,19 @@
     }
   }
 
-  $: filteredFiles = files.filter(file => {
-    const matchesCategory = selectedCategory === 'all' || file.waste_category === selectedCategory
-    const matchesSearch = file.file_name.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesCategory && matchesSearch && !file.is_deleted
-  })
+  let filteredFiles = $derived(
+    files.filter(file => {
+      const matchesCategory = selectedCategory === 'all' || file.waste_category === selectedCategory
+      const matchesSearch = file.file_name.toLowerCase().includes(searchQuery.toLowerCase())
+      return matchesCategory && matchesSearch && !file.is_deleted
+    })
+  );
 
-  $: categories = [...new Set(files.map(f => f.waste_category))]
+  let categories = $derived([...new Set(files.map(f => f.waste_category))]);
 
   async function deleteFile(fileId: string) {
     try {
-      const { error } = await supabase
-        .from('detected_files')
-        .update({ is_deleted: true })
-        .eq('id', fileId)
-
-      if (error) throw error
-
+      // Simula el borrado y la actualización en local del frontend
       files = files.map(f => f.id === fileId ? { ...f, is_deleted: true } : f)
     } catch (err) {
       console.error('Error deleting file:', err)
@@ -195,7 +194,7 @@
                 </div>
 
                 <button
-                  on:click={() => deleteFile(file.id)}
+                  onclick={() => deleteFile(file.id)}
                   class="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all duration-300 opacity-0 group-hover:opacity-100"
                   title="Mark as deleted"
                 >

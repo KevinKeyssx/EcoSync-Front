@@ -1,6 +1,5 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte'
-  import { supabase } from './supabase'
 
   const dispatch = createEventDispatcher()
 
@@ -97,43 +96,9 @@
 
   async function saveScanResults(files: any[]) {
     try {
-      const { data: scanData, error: scanError } = await supabase
-        .from('scans')
-        .insert({
-          user_id: '00000000-0000-0000-0000-000000000000',
-          total_files: scanResults.totalFiles,
-          total_size_gb: scanResults.totalSizeGB,
-          waste_files: scanResults.wasteFiles,
-          waste_size_gb: scanResults.wasteSizeGB,
-          co2_saved_estimate_g: scanResults.co2Estimate,
-          source_type: sourceType
-        })
-        .select()
-        .single()
-
-      if (scanError) throw scanError
-
-      const wasteFiles = files
-        .filter(f => f.isWaste)
-        .map(f => ({
-          scan_id: scanData.id,
-          file_name: f.name,
-          file_path: f.path,
-          file_size_mb: f.sizeMB,
-          file_type: f.name.split('.').pop(),
-          waste_category: f.category,
-          last_modified: f.lastModified
-        }))
-
-      if (wasteFiles.length > 0) {
-        const { error: filesError } = await supabase
-          .from('detected_files')
-          .insert(wasteFiles)
-
-        if (filesError) throw filesError
-      }
-
-      dispatch('scanComplete', { scanId: scanData.id })
+      // Simula el guardado de datos locales
+      const mockScanId = "mock-scan-id-" + Date.now();
+      dispatch('scanComplete', { scanId: mockScanId })
     } catch (err) {
       console.error('Error saving scan:', err)
     }

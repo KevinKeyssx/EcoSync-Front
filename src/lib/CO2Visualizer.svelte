@@ -1,7 +1,11 @@
 <script lang="ts">
-  export let co2SavedGrams: number
+  interface Props {
+    co2SavedGrams: number;
+  }
 
-  const equivalencies = [
+  let { co2SavedGrams }: Props = $props();
+
+  let equivalencies = $derived([
     {
       name: 'Smartphone charges',
       value: co2SavedGrams / 8.22,
@@ -17,7 +21,7 @@
       value: co2SavedGrams / 404,
       icon: 'M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z'
     }
-  ]
+  ]);
 </script>
 
 <div class="glass-effect rounded-2xl p-6 overflow-hidden relative">
