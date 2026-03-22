@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, createEventDispatcher } from 'svelte'
-  import { supabase, type Scan } from './supabase'
+  import type { Scan } from './types'
   import StatCard from './StatCard.svelte'
   import CO2Visualizer from './CO2Visualizer.svelte'
 
@@ -19,15 +19,10 @@
   async function loadScans() {
     loading = true
     try {
-      const { data, error } = await supabase
-        .from('scans')
-        .select('*')
-        .order('scan_date', { ascending: false })
-        .limit(5)
-
-      if (error) throw error
-
-      scans = data || []
+      // Simula fetch
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      scans = [] // Datos simulados vacíos en local
       calculateTotals()
     } catch (err) {
       console.error('Error loading scans:', err)
@@ -68,13 +63,13 @@
       color="blue"
       loading={loading}
     />
-    <StatCard
+    <!-- <StatCard
       title="Total Scans"
       value="{totalScans}"
       icon="scan"
       color="teal"
       loading={loading}
-    />
+    /> -->
   </div>
 
   <CO2Visualizer co2SavedGrams={totalCO2Saved} />
