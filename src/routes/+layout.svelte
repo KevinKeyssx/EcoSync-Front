@@ -41,10 +41,10 @@
     </div>
 
     <!-- Contenido de la Aplicación -->
-    <section class="relative z-10 flex flex-col">
+    <section class="relative z-10 flex flex-col flex-1 w-full">
         <Header {darkMode} onToggle={handleToggle} />
 
-        <div class="w-full mx-auto px-4 sm:px-6 pt-24 pb-12  items-center justify-center">
+        <div class="flex flex-col flex-1 w-full mx-auto px-4 sm:px-6 pt-24 pb-12">
             {@render children()}
         </div>
 
