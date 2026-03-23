@@ -3,14 +3,16 @@
     <div class="max-w-4xl mx-auto space-y-8 animate-slide-up">
         
         <!-- Hero Logo Flotante -->
-        <div class="w-full flex justify-center mb-2">
-            <div class="relative group">
-                <div class="absolute inset-0 bg-emerald-400 blur-2xl opacity-20 group-hover:opacity-50 transition-opacity duration-700 rounded-full"></div>
+        <div class="w-full flex justify-center mb-4">
+            <div class="relative group flex flex-col items-center justify-center">
+                <div class="absolute inset-0 bg-emerald-400 blur-3xl opacity-10 group-hover:opacity-25 transition-opacity duration-700 rounded-full dark:opacity-5 dark:group-hover:opacity-20"></div>
                 <img 
                     src="/logo.avif" 
                     alt="EcoSync" 
-                    class="w-32 h-32 md:w-40 md:h-40 object-contain relative z-10 drop-shadow-[0_0_20px_rgba(52,211,153,0.3)] hover:scale-105 transition-transform duration-500"
+                    class="w-32 h-32 md:w-40 md:h-40 object-contain relative z-10 drop-shadow-[0_0_20px_rgba(52,211,153,0.3)] hover:scale-105 transition-transform duration-500 mt-8"
                 />
+
+                <h1 class="text-6xl md:text-8xl font-extrabold tracking-tight text-transparent bg-clip-text bg-linear-to-r from-emerald-400 via-teal-400 to-emerald-300 leading-tight mt-2 pb-2">EcoSync</h1>
             </div>
         </div>
 
@@ -19,7 +21,7 @@
             EcoSync v1.0 disponible
         </div>
 
-        <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
+        <h1 class="text-5xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
             Optimiza tu Huella de <br class="hidden sm:block" />
             <span class="text-transparent bg-clip-text bg-linear-to-r from-emerald-400 via-teal-400 to-emerald-300">
                 Carbono Digital
@@ -42,7 +44,7 @@
     </div>
 
     <!-- Cards de Características (Features) - Glassmorphism -->
-    <div id="caracteristicas" class="mt-32 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl animate-slide-up" style="animation-delay: 0.2s;">
+    <div id="caracteristicas" class="mt-24 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl animate-slide-up" style="animation-delay: 0.2s;">
         
         <!-- Tarjeta 1 -->
         <div class="rounded-2xl p-8 text-left hover:-translate-y-2 transition-transform duration-300 border border-slate-200 dark:border-white/10 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl shadow-lg">
