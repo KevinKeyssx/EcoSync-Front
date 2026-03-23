@@ -15,18 +15,111 @@ body {
 }
 
 
+@font-face {
+    font-family: 'Lexend-Light';
+    src: url('/fonts/Lexend-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+@font-face {
+    font-family: 'Lexend-Regular';
+    src: url('/fonts/Lexend-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+@font-face {
+    font-family: 'Lexend-Bold';
+    src: url('/fonts/Lexend-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+@font-face {
+    font-family: 'Lexend-ExtraBold';
+    src: url('/fonts/Lexend-ExtraBold.woff2') format('woff2');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+@font-face {
+    font-family: 'Lexend-Medium';
+    src: url('/fonts/Lexend-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+
 @layer base {
-  body {
-    @apply bg-linear-to-br from-slate-950 via-emerald-950 to-slate-950 min-h-screen;
-  }
+    body {
+        @apply bg-linear-to-br from-slate-950 via-emerald-950 to-slate-950 min-h-screen;
+        font-family: 'Lexend-Regular', sans-serif;
+    }
+
+    h1 {
+        font-family: 'Lexend-ExtraBold', sans-serif;
+    }
+
+    h2 {
+        font-family: 'Lexend-Bold', sans-serif;
+    }
+
+    h3 {
+        font-family: 'Lexend-Medium', sans-serif;
+    }
+
+    h4 {
+        font-family: 'Lexend-Regular', sans-serif;
+    }
+
+    h5 {
+        font-family: 'Lexend-Light', sans-serif;
+    }
+
+    h6 {
+        font-family: 'Lexend-Light', sans-serif;
+    }
+
+    ::selection {
+        background-color: #10b981;
+        color: #ffffff;
+    }
+
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #10b981;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #059669;
+    }
 }
 
 @layer utilities {
-  .glass-effect {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10;
-  }
+    .glass-effect {
+        @apply bg-white/5 backdrop-blur-xl border border-white/10;
+    }
 
-  .glow-effect {
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
-  }
+    .glow-effect {
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    }
 }
