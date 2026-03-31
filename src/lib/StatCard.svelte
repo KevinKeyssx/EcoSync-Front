@@ -31,17 +31,17 @@
 <div class="glass-effect rounded-2xl p-6 hover:scale-105 transition-all duration-300">
   <div class="flex items-center justify-between mb-4">
     <div class="w-12 h-12 rounded-xl bg-gradient-to-br {colorClasses[color]} flex items-center justify-center animate-float">
-      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="w-6 h-6 text-slate-900 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={icons[icon]}></path>
       </svg>
     </div>
   </div>
 
-  <h3 class="text-sm text-emerald-400/70 mb-2">{title}</h3>
+  <h3 class="text-sm text-emerald-700/70 dark:text-emerald-400/70 mb-2">{title}</h3>
 
   {#if loading}
-    <div class="h-8 w-24 bg-white/10 rounded animate-pulse"></div>
+    <div class="h-8 w-24 bg-slate-900/10 dark:bg-white/10 rounded animate-pulse"></div>
   {:else}
-    <p class="text-3xl font-bold text-white">{value}</p>
+    <p class="text-3xl font-bold text-slate-900 dark:text-white">{value}</p>
   {/if}
 </div>

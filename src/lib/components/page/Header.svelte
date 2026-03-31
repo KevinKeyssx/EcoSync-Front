@@ -9,7 +9,7 @@
 	let { darkMode, onToggle } : Props = $props( );
 </script>
 
-<header class="fixed top-0 w-full h-18 bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl flex justify-between items-center z-50 border-b border-gray-200 dark:border-white/10 transition-colors pointer-events-none px-6">
+<header class="fixed top-0 w-full h-18 bg-white/70 dark:bg-slate-950/70 backdrop-blur-xl flex justify-between items-center z-50 border-b border-gray-200 dark:border-slate-900/10 dark:dark:border-white/10 transition-colors pointer-events-none px-6">
 	<div class="h-full flex items-center pointer-events-auto shrink-0 relative gap-3 p-1">
 		<a href="/" class="flex h-full items-center no-underline relative group transition-transform hover:scale-105 active:scale-95 duration-300">
             <!-- EcoSync Logo (Anti-aliasing fix) -->
@@ -23,7 +23,7 @@
                 />
             </div>
 			<div class="ml-3 flex flex-col justify-center">
-				<span class="font-bold text-slate-800 dark:text-emerald-400 tracking-wide text-xl leading-none">EcoSync</span>
+				<span class="font-bold text-slate-800 dark:text-emerald-700 dark:dark:text-emerald-400 tracking-wide text-xl leading-none">EcoSync</span>
 				<span class="text-xs text-emerald-600/80 dark:text-slate-400 uppercase tracking-widest font-medium mt-0.5">Optimizer</span>
 			</div>
 		</a>

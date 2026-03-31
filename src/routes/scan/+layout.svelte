@@ -24,19 +24,19 @@
                         <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-teal-300">
                             Eco-Sync
                         </h1>
-                        <p class="text-sm text-emerald-400/70">Módulos de Limpieza</p>
+                        <p class="text-sm text-emerald-700/70 dark:text-emerald-400/70">Módulos de Limpieza</p>
                     </div>
                 </div>
 
                 <nav class="flex gap-2">
-                    <a href="/dashboard" class="px-4 py-2 rounded-xl transition-all duration-300 glass-effect text-emerald-400 hover:bg-white/10">
+                    <a href="/dashboard" class="px-4 py-2 rounded-xl transition-all duration-300 glass-effect text-emerald-700 dark:text-emerald-400 hover:bg-slate-900/10 dark:hover:bg-white/10">
                         Dashboard
                     </a>
                 </nav>
             </div>
 
             {#if isSubpage}
-                <a href="/scan" class="inline-flex items-center gap-2 text-emerald-400/70 hover:text-emerald-400 transition-colors font-semibold group rounded-lg focus:outline-none mt-2">
+                <a href="/scan" class="inline-flex items-center gap-2 text-emerald-700/70 dark:text-emerald-400/70 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors font-semibold group rounded-lg focus:outline-none mt-2">
                     <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     Volver al Hub
                 </a>
