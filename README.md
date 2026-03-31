@@ -24,6 +24,9 @@ EcoSync es una plataforma integral diseñada para combatir la contaminación dig
 
 La plataforma cuenta con cuatro fases de análisis avanzado:
 
+![EcoSync Hub](static/docs/Captura%20de%20pantalla%202026-03-31%20122639.png)
+
+
 ### 1. Gestión de Repositorios (GitHub)
 Analiza repositorios inactivos y forks obsoletos en tu perfil de desarrollador.
 ![GitHub Scan](static/docs/Captura%20de%20pantalla%202026-03-31%20122526.png)
