@@ -37,7 +37,7 @@ La plataforma cuenta con cuatro fases de análisis avanzado integradas en un Hub
     </td>
     <td align="center" width="50%">
       <b>2. Optimización de Nube (Google Drive)</b><br>
-      <img src="static/docs/Captura%20de%20pantalla%202026-03-31%20122546.png" width="100%"><br>
+      <img src="static/docs/Captura%20de%20pantalla%202026-03-30%20195541.png" width="100%"><br>
       <sub>Identifica archivos duplicados y pesados en la nube.</sub>
     </td>
   </tr>
