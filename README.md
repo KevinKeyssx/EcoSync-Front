@@ -68,26 +68,6 @@ La plataforma ha sido diseñada bajo una arquitectura de micro-interacciones flu
 
 ---
 
-## Guía de Instalación Local
-
-Para correr EcoSync-Front en tu servidor local:
-
-1. **Instalar dependencias:** `npm install`
-2. **Configurar .env:** Crear archivo con `PUBLIC_URL_API="http://localhost:8000"`
-3. **Correr programa:** `npm run dev`
-
-### Stack Tecnológico
-
-- **Svelte 5 / SvelteKit:** Reactividad rápida con el sistema de Runes.
-- **Tailwind CSS:** Interfaz adaptable con soporte Dark Mode.
-- **Micro-animaciones:** Transiciones fluidas en el Dashboard.
-
----
-
-## Galería de Visualización del Sistema
-
-A continuación, se muestran capturas adicionales del flujo de análisis y los resultados de mitigación:
-
 <div align="center">
   <b>Estado de Análisis (Drive)</b><br>
   <img src="static/docs/Captura%20de%20pantalla%202026-03-30%20195126.png" width="80%"><br><br>
