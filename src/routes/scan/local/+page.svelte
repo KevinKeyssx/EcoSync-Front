@@ -4,9 +4,9 @@
   import { onMount } from 'svelte';
   import { toast } from 'svelte-sonner';
 
-  import { PUBLIC_URL_API } from '$env/static/public';
+  import { env } from '$env/dynamic/public';
 
-  const API = PUBLIC_URL_API;
+  const API = env.PUBLIC_URL_API;
 
   type LocalState = 'loading_dirs' | 'selecting' | 'scanning' | 'results';
   let lState: LocalState = $state('loading_dirs');

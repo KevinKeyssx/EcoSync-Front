@@ -5,9 +5,9 @@
   import { toast } from 'svelte-sonner';
   import ConfirmDelete from '$lib/components/shared/ConfirmDelete.svelte';
 
-  import { PUBLIC_URL_API } from '$env/static/public';
+  import { env } from '$env/dynamic/public';
 
-  const API = PUBLIC_URL_API;
+  const API = env.PUBLIC_URL_API;
 
   type DriveState = 'disconnected' | 'connecting' | 'scanning' | 'results';
   let drvState: DriveState = $state( 'disconnected' );

@@ -1,11 +1,10 @@
 <script lang="ts">
-  import InternetLoader from '$lib/loaders/InternetLoader.svelte';
-  import { fade, slide } from 'svelte/transition';
+  import { fade } from 'svelte/transition';
   import { toast } from 'svelte-sonner';
 
-  import { PUBLIC_URL_API } from '$env/static/public';
+  import { env } from '$env/dynamic/public';
 
-  const API = PUBLIC_URL_API;
+  const API = env.PUBLIC_URL_API;
 
   type OsintState = 'idle' | 'scanning' | 'results';
   let scanState: OsintState = $state('idle');
