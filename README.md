@@ -66,16 +66,6 @@ La plataforma ha sido diseñada bajo una arquitectura de micro-interacciones flu
 3.  **Métricas Ecológicas Comparativas:** Transformación de GB eliminados en indicadores reales (horas de luz LED, CO2 absorbido por árboles).
 4.  **Limpieza Inteligente y Segura:** Control dual entre borrado transitorio (Papelera) y destrucción permanente de recursos.
 
----
-
-<div align="center">
-  <b>Estado de Análisis (Drive)</b><br>
-  <img src="static/docs/Captura%20de%20pantalla%202026-03-30%20195126.png" width="80%"><br><br>
-  <b>Métricas de Resultados y Ahorro CO2</b><br>
-  <img src="static/docs/Captura%20de%20pantalla%202026-03-30%20195541.png" width="80%">
-</div>
-
----
 
 <div align="center">
   <p>Desarrollado por el equipo de EcoSync.</p>
