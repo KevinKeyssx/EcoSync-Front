@@ -1,47 +1,96 @@
-# Svelte + TS + Vite
+# EcoSync — Frontend
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+<div align="center">
+  <img src="static/logo.avif" alt="EcoSync Logo" width="120" />
+  <h1>EcoSync: Limpieza Digital para un Planeta Sostenible</h1>
+  <p><b>Optimiza tu espacio, reduce tu huella y combate la contaminación invisible.</b></p>
+</div>
 
-## Recommended IDE Setup
+---
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+## Sobre el Proyecto
 
-## Need an official Svelte framework?
+EcoSync es una plataforma integral diseñada para combatir la contaminación digital invisible. Nuestra aplicación escanea tu huella a través de múltiples entornos y servicios, detectando basura residual, archivos "muertos", repositorios archivados y recursos duplicados.
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+### Nuestra Misión y Visión
 
-## Technical considerations
+**Misión:** Capacitar y empoderar a los usuarios sobre el impacto medioambiental que genera el almacenamiento inútil. Proveemos herramientas intuitivas y seguras para erradicar la "basura digital", reduciendo activamente nuestra huella de carbono digital personal y empresarial.
 
-**Why use this over SvelteKit?**
+**Visión:** Convertirnos en el estándar definitivo para la concientización ecológica de datos a nivel mundial. Visualizamos un internet más liviano, ordenado y sostenible.
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+---
 
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+## Módulos de Limpieza e Inteligencia
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+La plataforma cuenta con cuatro fases de análisis avanzado:
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
+### 1. Gestión de Repositorios (GitHub)
+Analiza repositorios inactivos y forks obsoletos en tu perfil de desarrollador.
+![GitHub Scan](static/docs/Captura%20de%20pantalla%202026-03-31%20122526.png)
 
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
+### 2. Optimización de Nube (Google Drive)
+Identifica archivos duplicados y de gran tamaño que consumen energía en centros de datos.
+![Drive Scan](static/docs/Captura%20de%20pantalla%202026-03-31%20122546.png)
 
-**Why include `.vscode/extensions.json`?**
+### 3. Almacenamiento Local (PC)
+Localiza instaladores, temporales y cachés residuales directamente en tu disco duro.
+![Local Scan](static/docs/Captura%20de%20pantalla%202026-03-31%20122558.png)
 
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
+### 4. Cazador de Cuentas (OSINT)
+Rastrea perfiles asociados a tu identidad digital para facilitar el derecho al olvido.
+![OSINT Radar](static/docs/Captura%20de%20pantalla%202026-03-31%20122619.png)
 
-**Why enable `allowJs` in the TS template?**
+---
 
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
+## Funcionamiento y Flujo de Usuario
 
-**Why is HMR not preserving my local component state?**
+La plataforma ha sido diseñada bajo una arquitectura de micro-interacciones fluida, utilizando una interfaz minimalista (Glassmorphism) para centrar la atención en la toma de decisiones ecológicas. El proceso se divide en cuatro fases críticas:
 
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
+#### 1. Autenticación y Configuración de Reglas
+El usuario selecciona el entorno de análisis (Google Drive, GitHub, PC Local o Cuentas). EcoSync gestiona la seguridad mediante flujos de **OAuth2** (permisos temporales y seguros) o el ingreso de parámetros de escaneo específicos. En esta etapa, es posible definir umbrales de búsqueda, como la antigüedad del archivo o el tamaño mínimo de detección.
 
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
+#### 2. Motor de Análisis de Impacto
+Nuestro motor procesa los metadatos en tiempo real para clasificar la "basura digital". El análisis incluye la detección de:
+*   **Repositorios Zombie:** Forks antiguos que no han recibido actualizaciones ni actividad del desarrollador.
+*   **Cachés Residuales:** Archivos temporales ocultos que han quedado en el sistema tras la desinstalación de aplicaciones.
+*   **Identidad Digital:** Rastreo de huellas en decenas de plataformas obsoletas que exigen mantenimiento energético de datos persistentes.
 
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
-```
+#### 3. Métricas Ecológicas Comparativas
+Antes de proceder, los datos se transforman en **indicadores de impacto real** a través de un Dashboard dinámico. En lugar de simples estadísticas de disco, EcoSync muestra conversiones comprensibles del exceso energético:
+*   Equivalencia en horas de iluminación mediante bombillas LED.
+*   Cálculo del número de árboles necesarios para absorber el excedente de CO2 generado por tus archivos inactivos.
+*   Comparativas de ahorro energético por GB eliminado mensualmente.
+
+#### 4. Ejecución de Limpieza Inteligente y Segura
+Mediante una ventana de revisión interactiva, el usuario valida los elementos a eliminar. La plataforma ofrece un sistema de control dual:
+*   **Papelera Transitoria:** Envío seguro a la papelera del sistema para una posible recuperación.
+*   **Destrucción Permanente:** Borrado directo de la infraestructura para maximizar el ahorro de espacio instantáneo. 
+Cada acción de limpieza actualiza automáticamente tu récord global de mitigación climática en la plataforma.
+
+### Demostración Visual
+![EcoSync Demo](static/docs/recording.gif)
+
+---
+
+## Guía de Instalación Local
+
+Para correr EcoSync-Front en tu servidor local:
+
+1. **Instalar dependencias:** `npm install`
+2. **Configurar .env:** Crear archivo con `PUBLIC_URL_API="http://localhost:8000"`
+3. **Correr programa:** `npm run dev`
+
+---
+
+## Stack Tecnológico
+
+- **Svelte 5 / SvelteKit:** Reactividad rápida con el sistema de Runes.
+- **Tailwind CSS:** Interfaz adaptable con soporte Dark Mode.
+- **Micro-animaciones:** Transiciones fluidas en el Dashboard.
+
+---
+
+<div align="center">
+  <p>Desarrollado por el equipo de EcoSync.</p>
+  <p><b>Hagamos del internet un lugar más verde.</b></p>
+</div>
