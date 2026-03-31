@@ -49,7 +49,7 @@ La plataforma cuenta con cuatro fases de análisis avanzado integradas en un Hub
     </td>
     <td align="center" width="50%">
       <b>4. Cazador de Cuentas (OSINT)</b><br>
-      <img src="static/docs/Captura%20de%20pantalla%202026-03-31%20122619.png" width="100%"><br>
+      <img src="static/docs/Captura de pantalla 2026-03-31 144311.png" width="100%"><br>
       <sub>Rastrea huellas digitales en plataformas obsoletas.</sub>
     </td>
   </tr>
