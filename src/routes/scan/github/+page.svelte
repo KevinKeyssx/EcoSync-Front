@@ -60,6 +60,8 @@
 
     function connectGithub() {
         // Redirigir al flujo OAuth real del backend
+        console.log('***Conectando a: ', API);
+
         window.location.href = `${API}/auth/login`;
     }
 
