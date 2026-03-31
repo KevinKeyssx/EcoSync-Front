@@ -14,9 +14,9 @@
   let searchQuery = $state('');
 
   const categoryColors: Record<string, string> = {
-    duplicates: 'bg-yellow-500/20 text-yellow-400 border-yellow-400/30',
-    temp_files: 'bg-blue-500/20 text-blue-400 border-blue-400/30',
-    old_installers: 'bg-red-500/20 text-red-400 border-red-400/30',
+    duplicates: 'bg-yellow-700/20 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-400/30',
+    temp_files: 'bg-blue-700/20 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 border-blue-400/30',
+    old_installers: 'bg-red-700/20 dark:bg-red-500/20 text-red-700 dark:text-red-400 border-red-400/30',
     node_modules: 'bg-purple-500/20 text-purple-400 border-purple-400/30',
     cache: 'bg-orange-500/20 text-orange-400 border-orange-400/30',
     logs: 'bg-pink-500/20 text-pink-400 border-pink-400/30',
@@ -103,26 +103,26 @@
   {#if scan}
     <div class="glass-effect rounded-2xl p-6">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-2xl font-bold text-emerald-400">Scan Results</h2>
-        <span class="text-sm text-emerald-400/70">{formatDate(scan.scan_date)}</span>
+        <h2 class="text-2xl font-bold text-emerald-700 dark:text-emerald-400">Scan Results</h2>
+        <span class="text-sm text-emerald-700/70 dark:text-emerald-400/70">{formatDate(scan.scan_date)}</span>
       </div>
 
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white/5 rounded-xl p-4">
-          <p class="text-sm text-emerald-400/70 mb-1">Total Files</p>
-          <p class="text-2xl font-bold text-white">{scan.total_files}</p>
+        <div class="bg-slate-900/5 dark:bg-white/5 rounded-xl p-4">
+          <p class="text-sm text-emerald-700/70 dark:text-emerald-400/70 mb-1">Total Files</p>
+          <p class="text-2xl font-bold text-slate-900 dark:text-white">{scan.total_files}</p>
         </div>
-        <div class="bg-white/5 rounded-xl p-4">
-          <p class="text-sm text-emerald-400/70 mb-1">Waste Files</p>
-          <p class="text-2xl font-bold text-yellow-400">{scan.waste_files}</p>
+        <div class="bg-slate-900/5 dark:bg-white/5 rounded-xl p-4">
+          <p class="text-sm text-emerald-700/70 dark:text-emerald-400/70 mb-1">Waste Files</p>
+          <p class="text-2xl font-bold text-yellow-700 dark:text-yellow-400">{scan.waste_files}</p>
         </div>
-        <div class="bg-white/5 rounded-xl p-4">
-          <p class="text-sm text-emerald-400/70 mb-1">Space Wasted</p>
-          <p class="text-2xl font-bold text-red-400">{Number(scan.waste_size_gb).toFixed(2)} GB</p>
+        <div class="bg-slate-900/5 dark:bg-white/5 rounded-xl p-4">
+          <p class="text-sm text-emerald-700/70 dark:text-emerald-400/70 mb-1">Space Wasted</p>
+          <p class="text-2xl font-bold text-red-700 dark:text-red-400">{Number(scan.waste_size_gb).toFixed(2)} GB</p>
         </div>
-        <div class="bg-white/5 rounded-xl p-4">
-          <p class="text-sm text-emerald-400/70 mb-1">CO₂ Impact</p>
-          <p class="text-2xl font-bold text-emerald-400">{Number(scan.co2_saved_estimate_g).toFixed(0)}g</p>
+        <div class="bg-slate-900/5 dark:bg-white/5 rounded-xl p-4">
+          <p class="text-sm text-emerald-700/70 dark:text-emerald-400/70 mb-1">CO₂ Impact</p>
+          <p class="text-2xl font-bold text-emerald-700 dark:text-emerald-400">{Number(scan.co2_saved_estimate_g).toFixed(0)}g</p>
         </div>
       </div>
     </div>
@@ -135,13 +135,13 @@
           type="text"
           bind:value={searchQuery}
           placeholder="Search files..."
-          class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-emerald-400/50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          class="w-full px-4 py-3 bg-slate-900/5 dark:bg-white/5 border border-slate-900/10 dark:border-white/10 rounded-xl text-slate-900 dark:text-white placeholder-emerald-400/50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
         />
       </div>
 
       <select
         bind:value={selectedCategory}
-        class="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        class="px-4 py-3 bg-slate-900/5 dark:bg-white/5 border border-slate-900/10 dark:border-white/10 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
       >
         <option value="all">All Categories</option>
         {#each categories as category}
@@ -159,12 +159,12 @@
         <svg class="w-16 h-16 mx-auto mb-4 text-emerald-400/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
         </svg>
-        <p class="text-emerald-400/70">No files found matching your criteria</p>
+        <p class="text-emerald-700/70 dark:text-emerald-400/70">No files found matching your criteria</p>
       </div>
     {:else}
       <div class="space-y-2 max-h-[600px] overflow-y-auto pr-2">
         {#each filteredFiles as file}
-          <div class="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300 group">
+          <div class="bg-slate-900/5 dark:bg-white/5 rounded-xl p-4 border border-slate-900/10 dark:border-white/10 hover:bg-slate-900/10 dark:hover:bg-white/10 transition-all duration-300 group">
             <div class="flex items-start justify-between gap-4">
               <div class="flex items-start gap-3 flex-1 min-w-0">
                 <div class="w-10 h-10 rounded-lg {categoryColors[file.waste_category] || 'bg-gray-500/20 text-gray-400 border-gray-400/30'} border flex items-center justify-center flex-shrink-0">
@@ -174,13 +174,13 @@
                 </div>
 
                 <div class="flex-1 min-w-0">
-                  <h3 class="text-white font-medium truncate">{file.file_name}</h3>
-                  <p class="text-sm text-emerald-400/70 truncate">{file.file_path}</p>
+                  <h3 class="text-slate-900 dark:text-white font-medium truncate">{file.file_name}</h3>
+                  <p class="text-sm text-emerald-700/70 dark:text-emerald-400/70 truncate">{file.file_path}</p>
                   <div class="flex items-center gap-3 mt-1">
                     <span class="text-xs px-2 py-1 rounded {categoryColors[file.waste_category] || 'bg-gray-500/20 text-gray-400'} border">
                       {file.waste_category.replace('_', ' ')}
                     </span>
-                    <span class="text-xs text-emerald-400/70">
+                    <span class="text-xs text-emerald-700/70 dark:text-emerald-400/70">
                       Modified: {formatDate(file.last_modified)}
                     </span>
                   </div>
@@ -189,13 +189,13 @@
 
               <div class="flex items-center gap-3 flex-shrink-0">
                 <div class="text-right">
-                  <p class="text-white font-semibold">{formatFileSize(Number(file.file_size_mb))}</p>
-                  <p class="text-xs text-emerald-400/70">{Number(file.file_size_mb * 0.5 * 0.475).toFixed(1)}g CO₂/year</p>
+                  <p class="text-slate-900 dark:text-white font-semibold">{formatFileSize(Number(file.file_size_mb))}</p>
+                  <p class="text-xs text-emerald-700/70 dark:text-emerald-400/70">{Number(file.file_size_mb * 0.5 * 0.475).toFixed(1)}g CO₂/year</p>
                 </div>
 
                 <button
                   onclick={() => deleteFile(file.id)}
-                  class="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all duration-300 opacity-0 group-hover:opacity-100"
+                  class="p-2 rounded-lg bg-red-700/20 dark:bg-red-500/20 text-red-700 dark:text-red-400 hover:bg-red-500/30 transition-all duration-300 opacity-0 group-hover:opacity-100"
                   title="Mark as deleted"
                 >
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,12 +208,12 @@
         {/each}
       </div>
 
-      <div class="mt-4 pt-4 border-t border-white/10">
+      <div class="mt-4 pt-4 border-t border-slate-900/10 dark:border-white/10">
         <div class="flex items-center justify-between text-sm">
-          <span class="text-emerald-400/70">
+          <span class="text-emerald-700/70 dark:text-emerald-400/70">
             Showing {filteredFiles.length} of {files.filter(f => !f.is_deleted).length} files
           </span>
-          <span class="text-emerald-400 font-semibold">
+          <span class="text-emerald-700 dark:text-emerald-400 font-semibold">
             Total: {formatFileSize(filteredFiles.reduce((sum, f) => sum + Number(f.file_size_mb), 0))}
           </span>
         </div>

@@ -171,17 +171,17 @@
 </script>
 
 <div class="glass-effect rounded-2xl p-8">
-  <h2 class="text-3xl font-bold text-emerald-400 mb-6">Start a New Scan</h2>
+  <h2 class="text-3xl font-bold text-emerald-700 dark:text-emerald-400 mb-6">Start a New Scan</h2>
 
   {#if !scanning}
     <div class="space-y-6">
       <div>
-        <label class="block text-sm font-medium text-emerald-400/70 mb-2">
+        <label class="block text-sm font-medium text-emerald-700/70 dark:text-emerald-400/70 mb-2">
           Select Source Type
         </label>
         <select
           bind:value={sourceType}
-          class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          class="w-full px-4 py-3 bg-slate-900/5 dark:bg-white/5 border border-slate-900/10 dark:border-white/10 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
         >
           <option value="local">Local Storage</option>
           <option value="drive">Google Drive</option>
@@ -191,9 +191,9 @@
         </select>
       </div>
 
-      <div class="bg-emerald-500/10 border border-emerald-400/30 rounded-xl p-4">
+      <div class="bg-emerald-700/10 dark:bg-emerald-500/10 border border-emerald-400/30 rounded-xl p-4">
         <div class="flex items-start gap-3">
-          <svg class="w-5 h-5 text-emerald-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 text-emerald-700 dark:text-emerald-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
           <div class="text-sm text-emerald-400/90">
@@ -211,7 +211,7 @@
 
       <button
         on:click={startScan}
-        class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-lg font-semibold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 glow-effect"
+        class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-900 dark:text-white text-lg font-semibold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 glow-effect"
       >
         Start Scanning
       </button>
@@ -219,21 +219,21 @@
   {:else}
     <div class="space-y-6">
       <div class="text-center">
-        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-500/20 mb-4 animate-pulse-slow">
-          <svg class="w-10 h-10 text-emerald-400 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-700/20 dark:bg-emerald-500/20 mb-4 animate-pulse-slow">
+          <svg class="w-10 h-10 text-emerald-700 dark:text-emerald-400 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
           </svg>
         </div>
-        <h3 class="text-2xl font-bold text-white mb-2">Scanning Files...</h3>
-        <p class="text-emerald-400/70 text-sm truncate max-w-md mx-auto">{currentFile}</p>
+        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Scanning Files...</h3>
+        <p class="text-emerald-700/70 dark:text-emerald-400/70 text-sm truncate max-w-md mx-auto">{currentFile}</p>
       </div>
 
       <div>
         <div class="flex items-center justify-between text-sm mb-2">
-          <span class="text-emerald-400/70">Progress</span>
-          <span class="text-emerald-400 font-semibold">{progress.toFixed(0)}%</span>
+          <span class="text-emerald-700/70 dark:text-emerald-400/70">Progress</span>
+          <span class="text-emerald-700 dark:text-emerald-400 font-semibold">{progress.toFixed(0)}%</span>
         </div>
-        <div class="h-4 bg-white/5 rounded-full overflow-hidden">
+        <div class="h-4 bg-slate-900/5 dark:bg-white/5 rounded-full overflow-hidden">
           <div
             class="h-full bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-400 rounded-full transition-all duration-300 relative overflow-hidden"
             style="width: {progress}%"
@@ -244,13 +244,13 @@
       </div>
 
       <div class="grid grid-cols-2 gap-4 mt-8">
-        <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-          <p class="text-sm text-emerald-400/70 mb-1">Files Scanned</p>
-          <p class="text-2xl font-bold text-white">{scanResults.totalFiles}</p>
+        <div class="bg-slate-900/5 dark:bg-white/5 rounded-xl p-4 border border-slate-900/10 dark:border-white/10">
+          <p class="text-sm text-emerald-700/70 dark:text-emerald-400/70 mb-1">Files Scanned</p>
+          <p class="text-2xl font-bold text-slate-900 dark:text-white">{scanResults.totalFiles}</p>
         </div>
-        <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-          <p class="text-sm text-emerald-400/70 mb-1">Waste Found</p>
-          <p class="text-2xl font-bold text-emerald-400">{scanResults.wasteFiles}</p>
+        <div class="bg-slate-900/5 dark:bg-white/5 rounded-xl p-4 border border-slate-900/10 dark:border-white/10">
+          <p class="text-sm text-emerald-700/70 dark:text-emerald-400/70 mb-1">Waste Found</p>
+          <p class="text-2xl font-bold text-emerald-700 dark:text-emerald-400">{scanResults.wasteFiles}</p>
         </div>
       </div>
     </div>
