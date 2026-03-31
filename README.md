@@ -44,7 +44,7 @@ La plataforma cuenta con cuatro fases de análisis avanzado integradas en un Hub
   <tr>
     <td align="center" width="50%">
       <b>3. Almacenamiento Local (PC)</b><br>
-      <img src="static/docs/Captura%20de%20pantalla%202026-03-31%20122558.png" width="100%"><br>
+      <img src="static/docs/41a4300f-e9d6-4c49-a374-374a098e826e.jpg" width="100%"><br>
       <sub>Localiza temporales y cachés en el disco duro.</sub>
     </td>
     <td align="center" width="50%">
