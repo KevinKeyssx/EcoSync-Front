@@ -23,8 +23,13 @@
         loading = true;
         try {
             // Simula fetch
-            await new Promise(resolve => setTimeout(resolve, 500));
-            scans = []; // Datos simulados vacíos en local
+            await new Promise(resolve => setTimeout(resolve, 300));
+            const saved = localStorage.getItem('ecoSyncScans');
+            if (saved) {
+                scans = JSON.parse(saved);
+            } else {
+                scans = []; 
+            }
             calculateTotals();
         } catch (err) {
             console.error('Error loading scans:', err);

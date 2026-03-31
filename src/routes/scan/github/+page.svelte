@@ -1,48 +1,215 @@
 <script lang="ts">
   import InternetLoader from '$lib/loaders/InternetLoader.svelte';
-  import SearchLoader from '$lib/loaders/SearchLoader.svelte';
-    import { fade } from 'svelte/transition';
+  import { fade } from 'svelte/transition';
+  import { page } from '$app/state';
+  import { onMount } from 'svelte';
 
-    type GithubState = 'disconnected' | 'connecting' | 'scanning' | 'results';
-    let ghState: GithubState = $state('disconnected');
+  const API = 'http://localhost:8000';
 
-    let mockResults = $state([
-        { id: 1, name: 'EcoSync-old-prototype', type: 'Repo inactivo', size: '45 MB', co2: '12g', selected: false },
-        { id: 2, name: 'react-tutorial-fork', type: 'Fork no sincronizado', size: '120 MB', co2: '32g', selected: false },
-        { id: 3, name: 'feature/experimental-ui', type: 'Rama stale', size: '2 MB', co2: '0.5g', selected: false },
-        { id: 4, name: 'test-api-bot', type: 'Repo vacío', size: '1 MB', co2: '0.2g', selected: false }
-    ]);
+  type GithubState = 'disconnected' | 'connecting' | 'scanning' | 'results';
+  let ghState: GithubState = $state('disconnected');
 
-    let allSelected = $derived(mockResults.length > 0 && mockResults.every(r => r.selected));
-    let selectedCount = $derived(mockResults.filter(r => r.selected).length);
+  interface RepoResult {
+    id: number;
+    name: string;
+    type: string;
+    size: string;
+    co2: string;
+    url: string;
+    days_inactive: number;
+    size_kb: number;
+    selected: boolean;
+    isWaste: boolean;
+  }
 
-    function toggleSelectAll() {
-        const newState = !allSelected;
-        mockResults = mockResults.map(item => ({ ...item, selected: newState }));
+  let results: RepoResult[] = $state([]);
+  let scanStats = $state({ totalRepos: 0, inactiveRepos: 0, totalSizeGB: 0, co2Saved: 0 });
+
+  let allSelected = $derived(results.length > 0 && results.every(r => r.selected));
+  let selectedCount = $derived(results.filter(r => r.selected).length);
+
+  onMount(() => {
+    // Si venimos del OAuth callback, iniciar escaneo automáticamente
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('authenticated') === 'true') {
+      // Limpiar el query param de la URL
+      window.history.replaceState({}, '', '/scan/github');
+      startGithubScan();
+    }
+  });
+
+  function toggleSelectAll() {
+    const newState = !allSelected;
+    results = results.map(item => ({ ...item, selected: newState }));
+  }
+
+  function connectGithub() {
+    // Redirigir al flujo OAuth real del backend
+    window.location.href = `${API}/auth/login`;
+  }
+
+  async function startGithubScan() {
+    ghState = 'connecting';
+
+    try {
+      // Verificar si estamos autenticados
+      const checkRes = await fetch(`${API}/repos`, { credentials: 'include' });
+      if (checkRes.status === 401) {
+        // No autenticado, redirigir a OAuth
+        connectGithub();
+        return;
+      }
+
+      ghState = 'scanning';
+
+      const data = await checkRes.json();
+      const repos = data.repos || [];
+
+      // También traer dead forks
+      let deadForkNames: string[] = [];
+      try {
+        const forksRes = await fetch(`${API}/dead-forks`, { credentials: 'include' });
+        if (forksRes.ok) {
+          const forksData = await forksRes.json();
+          deadForkNames = (forksData.forks || []).map((f: any) => f.name);
+        }
+      } catch (e) {
+        console.warn('No se pudieron cargar dead forks:', e);
+      }
+
+      // Mapear repos a resultados
+      let totalSizeKB = 0;
+      const mapped: RepoResult[] = repos.map((repo: any, i: number) => {
+        const isInactive = repo.days_inactive > 180;
+        const isDeadFork = deadForkNames.includes(repo.name);
+        const sizeKB = repo.size_kb || 0;
+        totalSizeKB += sizeKB;
+
+        let type = 'Activo';
+        let isWaste = false;
+        if (isDeadFork) { type = 'Fork no sincronizado'; isWaste = true; }
+        else if (isInactive && repo.is_fork) { type = 'Fork inactivo'; isWaste = true; }
+        else if (isInactive) { type = 'Repo inactivo'; isWaste = true; }
+        else if (repo.is_archived) { type = 'Archivado'; isWaste = true; }
+        else if (repo.is_fork) { type = 'Fork'; }
+
+        const sizeMB = sizeKB / 1024;
+        const co2g = sizeMB * 0.5 * 0.475;
+
+        return {
+          id: i,
+          name: repo.name,
+          type,
+          size: sizeMB >= 1024 ? `${(sizeMB / 1024).toFixed(2)} GB` : `${sizeMB.toFixed(1)} MB`,
+          co2: co2g >= 1000 ? `${(co2g / 1000).toFixed(2)}kg` : `${co2g.toFixed(1)}g`,
+          url: repo.url,
+          days_inactive: repo.days_inactive,
+          size_kb: sizeKB,
+          selected: false,
+          isWaste,
+        };
+      });
+
+      results = mapped;
+
+      const totalSizeGB = totalSizeKB / 1024 / 1024;
+      const wasteItems = mapped.filter(r => r.isWaste);
+      const inactiveCount = wasteItems.length;
+      const co2Total = mapped.reduce((sum, r) => sum + (r.size_kb / 1024 * 0.5 * 0.475), 0);
+
+      scanStats = {
+        totalRepos: repos.length,
+        inactiveRepos: inactiveCount,
+        totalSizeGB,
+        co2Saved: co2Total
+      };
+
+      // Guardar en localStorage para el Dashboard
+      const scanData = {
+        id: 'scan-' + Date.now(),
+        user_id: data.user?.login || 'github-user',
+        scan_date: new Date().toISOString(),
+        total_files: repos.length,
+        total_size_gb: totalSizeGB,
+        waste_files: inactiveCount,
+        waste_size_gb: mapped.reduce((s, r) => s + r.size_kb / 1024 / 1024, 0),
+        co2_saved_estimate_g: co2Total,
+        source_type: 'github',
+        created_at: new Date().toISOString()
+      };
+      const history = JSON.parse(localStorage.getItem('ecoSyncScans') || '[]');
+      history.unshift(scanData);
+      localStorage.setItem('ecoSyncScans', JSON.stringify(history));
+
+      ghState = 'results';
+
+    } catch (e) {
+      console.error('Error en el escaneo GitHub:', e);
+      alert('Error conectando con el backend: ' + e);
+      ghState = 'disconnected';
+    }
+  }
+
+  async function deleteSelected() {
+    if (selectedCount === 0) return;
+    const toDelete = results.filter(r => r.selected);
+    const confirmMsg = `⚠️ ACCIÓN IRREVERSIBLE\n\nVas a BORRAR permanentemente ${toDelete.length} repositorio(s) de tu cuenta de GitHub:\n\n${toDelete.map(r => '• ' + r.name).join('\n')}\n\n¿Estás completamente seguro?`;
+    if (!confirm(confirmMsg)) return;
+
+    let deleted = 0;
+    let failed = 0;
+
+    for (const repo of toDelete) {
+      try {
+        const res = await fetch(`${API}/manage-repo?action=delete`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ repo_name: repo.name, confirm: true })
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || 'Error');
+        }
+        deleted++;
+      } catch (e) {
+        console.error(`Error borrando ${repo.name}:`, e);
+        failed++;
+      }
     }
 
-    function connectGithub() {
-        ghState = 'connecting';
-        setTimeout(() => {
-            ghState = 'scanning';
-            setTimeout(() => {
-                ghState = 'results';
-            }, 2500);
-        }, 1500);
+    results = results.filter(r => !r.selected);
+    alert(`✅ Eliminados: ${deleted}\n❌ Fallidos: ${failed}`);
+  }
+
+  async function deleteAll() {
+    if (results.length === 0) return;
+    const confirmMsg = `🔴 BORRADO MASIVO IRREVERSIBLE\n\nVas a eliminar TODOS los ${results.length} repositorios inactivos listados.\n\nEscribe "ELIMINAR" para confirmar:`;
+    const input = prompt(confirmMsg);
+    if (input !== 'ELIMINAR') {
+      alert('Borrado cancelado.');
+      return;
     }
 
-    function deleteSelected() {
-        if(selectedCount === 0) return;
-        mockResults = mockResults.filter(item => !item.selected);
-        alert(`Se han eliminado ${selectedCount} elementos correctamente.`);
-    }
+    try {
+      const repoNames = results.map(r => r.name);
+      const res = await fetch(`${API}/bulk-delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ repo_names: repoNames, delete_all_candidates: false, confirm: true })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Error en bulk delete');
 
-    function deleteAll() {
-        const total = mockResults.length;
-        if(total === 0) return;
-        mockResults = [];
-        alert(`Limpieza automática completada. Se eliminaron ${total} elementos.`);
+      alert(`✅ Eliminados: ${data.deleted_count}\n❌ Fallidos: ${data.failed_count}`);
+      
+      const deletedNames = data.results.filter((r: any) => r.status === 'deleted').map((r: any) => r.repo_name);
+      results = results.filter(r => !deletedNames.includes(r.name));
+    } catch (e) {
+      alert('Error: ' + e);
     }
+  }
 </script>
 
 <div class="w-full" transition:fade>
@@ -66,19 +233,15 @@
 
         {:else if ghState === 'connecting' || ghState === 'scanning'}
             <div class="text-center py-20" transition:fade>
-                <!-- <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-emerald-500/20 mb-8 animate-pulse-slow">
-                    <SearchLoader />
-                </div> -->
-
                 <div class="flex justify-center mx-auto mb-5">
                     <InternetLoader />
                 </div>
 
                 <h3 class="text-2xl font-bold text-white mb-2">
-                    {ghState === 'connecting' ? 'Estableciendo conexión segura...' : 'Escaneando ramas y repositorios inactivos...'}
+                    {ghState === 'connecting' ? 'Estableciendo conexión segura...' : 'Escaneando repositorios inactivos y forks muertos...'}
                 </h3>
 
-                <p class="text-emerald-400/70">Este proceso puede tardar unos segundos.</p>
+                <p class="text-emerald-400/70">Consultando la API de GitHub en tiempo real.</p>
             </div>
 
         {:else if ghState === 'results'}
@@ -90,44 +253,113 @@
                             <span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-sm rounded-lg border border-emerald-500/30">Completado</span>
                         </h2>
                         <p class="text-emerald-400/70">
-                            Se detectaron <strong class="text-white">{mockResults.length} elementos</strong> obsoletos que generan una huella constante.
+                            Se analizaron <strong class="text-white">{scanStats.totalRepos} repositorios</strong> en tu cuenta de GitHub.
                         </p>
                     </div>
                     
                     <div class="flex gap-3 w-full md:w-auto">
-                        <button onclick={deleteAll} disabled={mockResults.length === 0} class="w-full md:w-auto px-6 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-red-500/30">
+                        <button onclick={deleteAll} disabled={results.length === 0} class="w-full md:w-auto px-6 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed border border-red-500/30">
                             Eliminar Todo (Auto)
                         </button>
                     </div>
                 </div>
 
-                {#if mockResults.length > 0}
+                <!-- Panel de Impacto CO₂ -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-white/5 rounded-xl p-5 border border-white/10 text-center">
+                        <div class="w-10 h-10 mx-auto rounded-lg bg-emerald-500/20 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        </div>
+                        <p class="text-2xl font-bold text-white">{scanStats.totalRepos}</p>
+                        <p class="text-xs text-emerald-400/70 mt-1">Repos Totales</p>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-5 border border-white/10 text-center">
+                        <div class="w-10 h-10 mx-auto rounded-lg bg-yellow-500/20 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
+                        </div>
+                        <p class="text-2xl font-bold text-yellow-400">{scanStats.inactiveRepos}</p>
+                        <p class="text-xs text-emerald-400/70 mt-1">Obsoletos</p>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-5 border border-white/10 text-center">
+                        <div class="w-10 h-10 mx-auto rounded-lg bg-blue-500/20 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7C5 4 4 5 4 7z"></path></svg>
+                        </div>
+                        <p class="text-2xl font-bold text-blue-400">{scanStats.totalSizeGB >= 1 ? scanStats.totalSizeGB.toFixed(2) + ' GB' : (scanStats.totalSizeGB * 1024).toFixed(1) + ' MB'}</p>
+                        <p class="text-xs text-emerald-400/70 mt-1">Almacenamiento</p>
+                    </div>
+                    <div class="bg-white/5 rounded-xl p-5 border border-emerald-500/20 text-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-emerald-500/5"></div>
+                        <div class="relative">
+                            <div class="w-10 h-10 mx-auto rounded-lg bg-emerald-500/20 flex items-center justify-center mb-3">
+                                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <p class="text-2xl font-bold text-emerald-400">{scanStats.co2Saved >= 1000 ? (scanStats.co2Saved / 1000).toFixed(2) + ' kg' : scanStats.co2Saved.toFixed(1) + ' g'}</p>
+                            <p class="text-xs text-emerald-400/70 mt-1">CO₂ al año</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Equivalencias del Mundo Real -->
+                <div class="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-5 mb-8">
+                    <h3 class="text-sm font-semibold text-emerald-400 mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Impacto Ambiental — Equivalencias
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">💡</span>
+                            <div>
+                                <p class="text-white font-medium">{(scanStats.co2Saved / 36).toFixed(1)} horas</p>
+                                <p class="text-emerald-400/60 text-xs">de bombilla LED encendida</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">🚗</span>
+                            <div>
+                                <p class="text-white font-medium">{(scanStats.co2Saved / 120).toFixed(2)} km</p>
+                                <p class="text-emerald-400/60 text-xs">recorridos en automóvil</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">🌳</span>
+                            <div>
+                                <p class="text-white font-medium">{(scanStats.co2Saved / 22000).toFixed(4)} árboles</p>
+                                <p class="text-emerald-400/60 text-xs">necesarios para absorberlo al año</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {#if results.length > 0}
                     <div class="bg-white/5 rounded-2xl border border-white/10 overflow-hidden mb-8">
                         <div class="grid grid-cols-12 gap-4 px-6 py-4 border-b border-white/10 bg-white/5 font-semibold text-sm text-emerald-400/70">
                             <div class="col-span-1 flex items-center">
                                 <input type="checkbox" checked={allSelected} onchange={toggleSelectAll} class="w-4 h-4 rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900 cursor-pointer" />
                             </div>
-                            <div class="col-span-5">Nombre / Ruta</div>
+                            <div class="col-span-5">Nombre / Repositorio</div>
                             <div class="col-span-3">Categoría</div>
                             <div class="col-span-3 text-right">Impacto (Tamaño / CO₂)</div>
                         </div>
 
                         <div class="divide-y divide-white/10">
-                            {#each mockResults as result (result.id)}
-                                <label class="grid grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-white/5 transition-colors cursor-pointer group">
+                            {#each results as result (result.id)}
+                                <label class="grid grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-white/5 transition-colors cursor-pointer group {result.isWaste ? 'border-l-2 border-l-red-500/50' : 'border-l-2 border-l-emerald-500/30'}">
                                     <div class="col-span-1">
                                         <input type="checkbox" bind:checked={result.selected} class="w-4 h-4 rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900 cursor-pointer" />
                                     </div>
                                     <div class="col-span-5 font-medium text-white flex items-center gap-2">
-                                        <svg class="w-5 h-5 text-emerald-400/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
-                                        {result.name}
+                                        <svg class="w-5 h-5 {result.isWaste ? 'text-red-400/50' : 'text-emerald-400/50'}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                                        <a href={result.url} target="_blank" class="hover:text-emerald-400 transition-colors">{result.name}</a>
                                     </div>
                                     <div class="col-span-3 text-sm text-emerald-400/70">
-                                        <span class="px-2 py-1 bg-white/5 border border-white/10 rounded-md text-xs">{result.type}</span>
+                                        <span class="px-2 py-1 rounded-md text-xs {result.isWaste ? 'bg-red-500/10 border border-red-500/30 text-red-400' : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'}">{result.type}</span>
+                                        {#if result.days_inactive > 0}
+                                            <span class="ml-2 text-xs text-white/40">{result.days_inactive}d</span>
+                                        {/if}
                                     </div>
                                     <div class="col-span-3 text-right flex flex-col items-end">
                                         <span class="font-bold text-white">{result.size}</span>
-                                        <span class="text-xs text-emerald-400 glow-effect">{result.co2}/año</span>
+                                        <span class="text-xs text-emerald-400">{result.co2}/año</span>
                                     </div>
                                 </label>
                             {/each}
@@ -145,7 +377,7 @@
                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         </div>
                         <h3 class="text-xl font-bold text-white mb-2">¡Todo limpio!</h3>
-                        <p class="text-emerald-400/70">No se encontraron más repositorios o ramas residuales. Tu GitHub está optimizado.</p>
+                        <p class="text-emerald-400/70">No se encontraron repositorios o ramas residuales. Tu GitHub está optimizado.</p>
                     </div>
                 {/if}
             </div>

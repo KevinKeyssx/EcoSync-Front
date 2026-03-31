@@ -35,25 +35,74 @@
       co2Estimate: 0
     }
 
-    const mockFiles = generateMockFiles(150)
+    let mockFiles: any[] = []
 
-    for (let i = 0; i < mockFiles.length; i++) {
-      currentFile = mockFiles[i].name
-      progress = ((i + 1) / mockFiles.length) * 100
+    if (sourceType === 'github') {
+      try {
+        currentFile = "Conectando a GitHub API..."
+        const res = await fetch('http://localhost:8000/repos', {credentials: 'include'})
+        if (res.status === 401) {
+            alert("No autenticado. Inicia sesión en http://localhost:8000 primero.")
+            scanning = false;
+            return;
+        }
+        if (!res.ok) throw new Error("Error en la petición de GitHub")
+        const data = await res.json()
+        const repos = data.repos || []
 
-      scanResults.totalFiles++
-      scanResults.totalSizeGB += mockFiles[i].sizeMB / 1024
+        for (let i = 0; i < repos.length; i++) {
+          const repo = repos[i]
+          currentFile = `Analizando repositorio: ${repo.name}`
+          progress = ((i + 1) / repos.length) * 100
 
-      if (mockFiles[i].isWaste) {
-        scanResults.wasteFiles++
-        scanResults.wasteSizeGB += mockFiles[i].sizeMB / 1024
+          scanResults.totalFiles++
+          const isWaste = repo.days_inactive > 180
+          // "Peso virtual" en MB basado en la popularidad y tamaño teórico (para impacto CO2)
+          const fakeMB = Math.max(15, Math.random() * 80 + ((repo.stars || 0) * 5))
+
+          scanResults.totalSizeGB += fakeMB / 1024
+          if (isWaste) {
+            scanResults.wasteFiles++
+            scanResults.wasteSizeGB += fakeMB / 1024
+          }
+
+          mockFiles.push({
+            name: repo.name,
+            path: repo.url,
+            sizeMB: fakeMB,
+            isWaste: isWaste,
+            category: 'inactive_repo',
+            lastModified: repo.last_commit_date || new Date().toISOString()
+          })
+
+          await new Promise(resolve => setTimeout(resolve, 20))
+        }
+
+      } catch(e) {
+        console.error(e)
+        alert('Error: ' + e)
+        scanning = false
+        return
       }
-
-      await new Promise(resolve => setTimeout(resolve, 30))
+    } else {
+      mockFiles = generateMockFiles(150)
+      for (let i = 0; i < mockFiles.length; i++) {
+        currentFile = mockFiles[i].name
+        progress = ((i + 1) / mockFiles.length) * 100
+  
+        scanResults.totalFiles++
+        scanResults.totalSizeGB += mockFiles[i].sizeMB / 1024
+  
+        if (mockFiles[i].isWaste) {
+          scanResults.wasteFiles++
+          scanResults.wasteSizeGB += mockFiles[i].sizeMB / 1024
+        }
+  
+        await new Promise(resolve => setTimeout(resolve, 30))
+      }
     }
 
     scanResults.co2Estimate = calculateCO2(scanResults.wasteSizeGB)
-
     await saveScanResults(mockFiles)
 
     scanning = false
@@ -96,8 +145,24 @@
 
   async function saveScanResults(files: any[]) {
     try {
-      // Simula el guardado de datos locales
-      const mockScanId = "mock-scan-id-" + Date.now();
+      const mockScanId = "scan-" + Date.now();
+      const scanData = {
+          id: mockScanId,
+          user_id: "user-local",
+          scan_date: new Date().toISOString(),
+          total_files: scanResults.totalFiles,
+          total_size_gb: scanResults.totalSizeGB,
+          waste_files: scanResults.wasteFiles,
+          waste_size_gb: scanResults.wasteSizeGB,
+          co2_saved_estimate_g: scanResults.co2Estimate,
+          source_type: sourceType,
+          created_at: new Date().toISOString()
+      };
+      
+      const history = JSON.parse(localStorage.getItem('ecoSyncScans') || '[]');
+      history.unshift(scanData);
+      localStorage.setItem('ecoSyncScans', JSON.stringify(history));
+
       dispatch('scanComplete', { scanId: mockScanId })
     } catch (err) {
       console.error('Error saving scan:', err)
@@ -122,6 +187,7 @@
           <option value="drive">Google Drive</option>
           <option value="dropbox">Dropbox</option>
           <option value="onedrive">OneDrive</option>
+          <option value="github">GitHub Repositories</option>
         </select>
       </div>
 

@@ -3,10 +3,10 @@
 
     const tools = [
         { id: 'github', name: 'GitHub', desc: 'Identifica y limpia repositorios abandonados, forks no sincronizados y ramas muertas.', status: 'active' },
-        { id: 'drive', name: 'Google Drive', desc: 'Encuentra archivos pesados, duplicados y cachés residuales ocultos.', status: 'dev' },
-        { id: 'local', name: 'Almacenamiento Local', desc: 'Analiza tu disco duro para liberar espacio y reducir requerimientos energéticos.', status: 'dev' },
+        { id: 'drive', name: 'Google Drive', desc: 'Encuentra archivos pesados, duplicados y cachés residuales ocultos.', status: 'active' },
+        { id: 'local', name: 'Almacenamiento Local', desc: 'Analiza tu disco duro para liberar espacio y reducir requerimientos energéticos.', status: 'active' },
         { id: 'onedrive', name: 'Microsoft Cloud', desc: 'Depura tu OneDrive corporativo y bandejas de correo antiguas.', status: 'dev' },
-        { id: 'accounts', name: 'Cuentas Fantasmas', desc: 'Rastrea y elimina cuentas web olvidadas para apagar tu rastro digital.', status: 'dev' }
+        { id: 'accounts', name: 'Cuentas Fantasmas', desc: 'Rastrea y elimina cuentas web olvidadas para apagar tu rastro digital.', status: 'active' }
     ];
 </script>
 
