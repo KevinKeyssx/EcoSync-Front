@@ -116,7 +116,7 @@ body {
 
 @layer utilities {
     .glass-effect {
-        @apply bg-white/5 backdrop-blur-xl border border-white/10;
+        @apply bg-slate-900/5 dark:bg-white/5 backdrop-blur-xl border border-slate-900/10 dark:border-white/10;
     }
 
     .glow-effect {
