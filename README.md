@@ -32,7 +32,7 @@ La plataforma cuenta con cuatro fases de análisis avanzado integradas en un Hub
   <tr>
     <td align="center" width="50%">
       <b>1. Gestión de Repositorios (GitHub)</b><br>
-      <img src="static/docs/Captura%20de%20pantalla%202026-03-31%20122526.png" width="100%"><br>
+      <img src="static/docs/f8aae074-06f6-4b37-b151-3630de0ab4ca.jpg" width="100%"><br>
       <sub>Analiza repositorios inactivos y forks obsoletos.</sub>
     </td>
     <td align="center" width="50%">
