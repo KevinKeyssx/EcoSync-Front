@@ -1,24 +1,23 @@
 <script lang="ts">
-    import { onMount }  from 'svelte';
-    import { fade }     from 'svelte/transition';
+    import { onMount }          from 'svelte';
+    import { fade }             from 'svelte/transition';
+    import { env }              from '$env/dynamic/public';
 
     import { toast } from 'svelte-sonner';
-    import ConfirmDelete from '$lib/components/shared/ConfirmDelete.svelte';
 
-    import InternetLoader       from '$lib/loaders/InternetLoader.svelte';
-    import { PUBLIC_URL_API }   from '$env/static/public';
+    import ConfirmDelete    from '$lib/components/shared/ConfirmDelete.svelte';
+    import InternetLoader   from '$lib/loaders/InternetLoader.svelte';
 
 
-    const API = PUBLIC_URL_API;
+    const API = env.PUBLIC_URL_API;
 
 
     type GithubState = 'disconnected' | 'connecting' | 'scanning' | 'results';
 
 
-    let ghState: GithubState = $state( 'disconnected' );
-
-    let showConfirmDialog	= $state( false );
-    let confirmMessage		= $state( '' );
+    let ghState: GithubState    = $state( 'disconnected' );
+    let showConfirmDialog       = $state( false );
+    let confirmMessage	        = $state( '' );
 
 
     interface RepoResult {
@@ -44,132 +43,146 @@
     onMount(() => {
         // Si venimos del OAuth callback, iniciar escaneo automáticamente
         const params = new URLSearchParams(window.location.search);
+
         if (params.get('authenticated') === 'true') {
-        // Limpiar el query param de la URL
-        window.history.replaceState({}, '', '/scan/github');
-        startGithubScan();
+            // Limpiar el query param de la URL
+            window.history.replaceState({}, '', '/scan/github');
+            startGithubScan();
         }
     });
+
 
     function toggleSelectAll() {
         const newState = !allSelected;
         results = results.map(item => ({ ...item, selected: newState }));
     }
 
+
     function connectGithub() {
         // Redirigir al flujo OAuth real del backend
         window.location.href = `${API}/auth/login`;
     }
 
+
     async function startGithubScan() {
         ghState = 'connecting';
 
         try {
-        // Verificar si estamos autenticados
-        const checkRes = await fetch(`${API}/repos`, { credentials: 'include' });
-        if (checkRes.status === 401) {
-            // No autenticado, redirigir a OAuth
-            connectGithub();
-            return;
-        }
+            // Verificar si estamos autenticados
+            const checkRes = await fetch(`${API}/repos`, { credentials: 'include' });
 
-        ghState = 'scanning';
-
-        const data = await checkRes.json();
-        const repos = data.repos || [];
-
-        // También traer dead forks
-        let deadForkNames: string[] = [];
-        try {
-            const forksRes = await fetch(`${API}/dead-forks`, { credentials: 'include' });
-            if (forksRes.ok) {
-            const forksData = await forksRes.json();
-            deadForkNames = (forksData.forks || []).map((f: any) => f.name);
+            if (checkRes.status === 401) {
+                // No autenticado, redirigir a OAuth
+                connectGithub();
+                return;
             }
-        } catch (e) {
-            console.warn('No se pudieron cargar dead forks:', e);
-        }
 
-        // Mapear repos a resultados
-        let totalSizeKB = 0;
-        const mapped: RepoResult[] = repos.map((repo: any, i: number) => {
-            const isInactive = repo.days_inactive > 180;
-            const isDeadFork = deadForkNames.includes(repo.name);
-            const sizeKB = repo.size_kb || 0;
-            totalSizeKB += sizeKB;
+            ghState = 'scanning';
 
-            let type = 'Activo';
-            let isWaste = false;
-            if (isDeadFork) { type = 'Fork no sincronizado'; isWaste = true; }
-            else if (isInactive && repo.is_fork) { type = 'Fork inactivo'; isWaste = true; }
-            else if (isInactive) { type = 'Repo inactivo'; isWaste = true; }
-            else if (repo.is_archived) { type = 'Archivado'; isWaste = true; }
-            else if (repo.is_fork) { type = 'Fork'; }
+            const data = await checkRes.json();
+            const repos = data.repos || [];
 
-            const sizeMB = sizeKB / 1024;
-            const co2g = sizeMB * 0.5 * 0.475;
+            // También traer dead forks
+            let deadForkNames: string[] = [];
 
-            return {
-            id: i,
-            name: repo.name,
-            type,
-            size: sizeMB >= 1024 ? `${(sizeMB / 1024).toFixed(2)} GB` : `${sizeMB.toFixed(1)} MB`,
-            co2: co2g >= 1000 ? `${(co2g / 1000).toFixed(2)}kg` : `${co2g.toFixed(1)}g`,
-            url: repo.url,
-            days_inactive: repo.days_inactive,
-            size_kb: sizeKB,
-            selected: false,
-            isWaste,
+            try {
+                const forksRes = await fetch(`${API}/dead-forks`, { credentials: 'include' });
+
+                if ( forksRes.ok ) {
+                    const forksData = await forksRes.json();
+                    deadForkNames = (forksData.forks || []).map((f: any) => f.name);
+                }
+            } catch (e) {
+                toast.error('No se pudieron cargar los dead forks');
+            }
+
+            // Mapear repos a resultados
+            let totalSizeKB = 0;
+
+            const mapped: RepoResult[] = repos.map((repo: any, i: number) => {
+                const isInactive = repo.days_inactive > 180;
+                const isDeadFork = deadForkNames.includes(repo.name);
+                const sizeKB = repo.size_kb || 0;
+
+                totalSizeKB += sizeKB;
+
+                let type = 'Activo';
+                let isWaste = false;
+
+                if (isDeadFork) { type = 'Fork no sincronizado'; isWaste = true; }
+                else if (isInactive && repo.is_fork) { type = 'Fork inactivo'; isWaste = true; }
+                else if (isInactive) { type = 'Repo inactivo'; isWaste = true; }
+                else if (repo.is_archived) { type = 'Archivado'; isWaste = true; }
+                else if (repo.is_fork) { type = 'Fork'; }
+
+                const sizeMB    = sizeKB / 1024;
+                const co2g      = sizeMB * 0.5 * 0.475;
+
+                return {
+                    id: i,
+                    name: repo.name,
+                    type,
+                    size: sizeMB >= 1024 ? `${(sizeMB / 1024).toFixed(2)} GB` : `${sizeMB.toFixed(1)} MB`,
+                    co2: co2g >= 1000 ? `${(co2g / 1000).toFixed(2)}kg` : `${co2g.toFixed(1)}g`,
+                    url: repo.url,
+                    days_inactive: repo.days_inactive,
+                    size_kb: sizeKB,
+                    selected: false,
+                    isWaste,
+                };
+            });
+
+            results = mapped;
+
+            const totalSizeGB   = totalSizeKB / 1024 / 1024;
+            const wasteItems    = mapped.filter( r => r.isWaste );
+            const inactiveCount = wasteItems.length;
+            const co2Total      = mapped.reduce(( sum, r ) => sum + ( r.size_kb / 1024 * 0.5 * 0.475 ), 0 );
+
+            scanStats = {
+                totalRepos      : repos.length,
+                inactiveRepos   : inactiveCount,
+                co2Saved        : co2Total,
+                totalSizeGB,
             };
-        });
 
-        results = mapped;
+            // Guardar en localStorage para el Dashboard
+            const scanData = {
+                id: 'scan-' + Date.now(),
+                user_id: data.user?.login || 'github-user',
+                scan_date: new Date().toISOString(),
+                total_files: repos.length,
+                total_size_gb: totalSizeGB,
+                waste_files: inactiveCount,
+                waste_size_gb: mapped.reduce((s, r) => s + r.size_kb / 1024 / 1024, 0),
+                co2_saved_estimate_g: co2Total,
+                source_type: 'github',
+                created_at: new Date().toISOString()
+            };
 
-        const totalSizeGB = totalSizeKB / 1024 / 1024;
-        const wasteItems = mapped.filter(r => r.isWaste);
-        const inactiveCount = wasteItems.length;
-        const co2Total = mapped.reduce((sum, r) => sum + (r.size_kb / 1024 * 0.5 * 0.475), 0);
+            const history = JSON.parse(localStorage.getItem('ecoSyncScans') || '[]');
 
-        scanStats = {
-            totalRepos: repos.length,
-            inactiveRepos: inactiveCount,
-            totalSizeGB,
-            co2Saved: co2Total
-        };
+            history.unshift(scanData);
 
-        // Guardar en localStorage para el Dashboard
-        const scanData = {
-            id: 'scan-' + Date.now(),
-            user_id: data.user?.login || 'github-user',
-            scan_date: new Date().toISOString(),
-            total_files: repos.length,
-            total_size_gb: totalSizeGB,
-            waste_files: inactiveCount,
-            waste_size_gb: mapped.reduce((s, r) => s + r.size_kb / 1024 / 1024, 0),
-            co2_saved_estimate_g: co2Total,
-            source_type: 'github',
-            created_at: new Date().toISOString()
-        };
-        const history = JSON.parse(localStorage.getItem('ecoSyncScans') || '[]');
-        history.unshift(scanData);
-        localStorage.setItem('ecoSyncScans', JSON.stringify(history));
+            localStorage.setItem('ecoSyncScans', JSON.stringify(history));
 
-        ghState = 'results';
-
+            ghState = 'results';
         } catch ( e ) {
-        console.error( 'Error en el escaneo GitHub:', e );
-        toast.error( 'Ocurrió un error inesperado, inténtalo más tarde.' );
-        ghState = 'disconnected';
+            toast.error( 'Ocurrió un error inesperado, inténtalo más tarde.' );
+            ghState = 'disconnected';
         }
     }
 
+
     async function deleteSelected( confirmed: boolean | Event = false ) {
         if ( selectedCount === 0 ) return;
+
         const toDelete = results.filter( r => r.selected );
-        
+
         if ( confirmed !== true ) {
             confirmMessage = `⚠️ ACCIÓN IRREVERSIBLE\n\nVas a BORRAR permanentemente ${ toDelete.length } repositorio(s) de tu cuenta de GitHub:\n\n${ toDelete.map( r => '• ' + r.name ).join( '\n' ) }\n\n¿Estás completamente seguro?`;
             showConfirmDialog = true;
+
             return;
         }
 
@@ -177,25 +190,29 @@
         let failed = 0;
 
         for (const repo of toDelete) {
-        try {
-            const res = await fetch(`${API}/manage-repo?action=delete`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ repo_name: repo.name, confirm: true })
-            });
-            if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.detail || 'Error');
+            try {
+                const res = await fetch(`${API}/manage-repo?action=delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ repo_name: repo.name, confirm: true })
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || 'Error');
+                }
+
+                deleted++;
+            } catch (e) {
+                toast.error(`Error borrando ${repo.name}`);
+
+                failed++;
             }
-            deleted++;
-        } catch (e) {
-            console.error(`Error borrando ${repo.name}:`, e);
-            failed++;
-        }
         }
 
         results = results.filter( r => !r.selected );
+
         if ( failed > 0 ) {
             toast.warning( `✅ Eliminados: ${ deleted }\n❌ Fallidos: ${ failed }` );
         } else {
@@ -203,34 +220,50 @@
         }
     }
 
+
     async function deleteAll() {
         if (results.length === 0) return;
-        const confirmMsg = `🔴 BORRADO MASIVO IRREVERSIBLE\n\nVas a eliminar TODOS los ${results.length} repositorios inactivos listados.\n\nEscribe "ELIMINAR" para confirmar:`;
-        const input = prompt( confirmMsg );
+
+        const confirmMsg    = `🔴 BORRADO MASIVO IRREVERSIBLE\n\nVas a eliminar TODOS los ${results.length} repositorios inactivos listados.\n\nEscribe "ELIMINAR" para confirmar:`;
+        const input         = prompt( confirmMsg );
+
         if ( input !== 'ELIMINAR' ) {
             toast.warning( 'Borrado cancelado.' );
+
             return;
         }
 
         try {
-        const repoNames = results.map(r => r.name);
-        const res = await fetch(`${API}/bulk-delete`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ repo_names: repoNames, delete_all_candidates: false, confirm: true })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || 'Error en bulk delete');
+            const repoNames = results.map(r => r.name);
 
-        if ( data.failed_count > 0 ) {
-            toast.warning( `✅ Eliminados: ${ data.deleted_count }\n❌ Fallidos: ${ data.failed_count }` );
-        } else {
-            toast.success( `✅ Eliminados: ${ data.deleted_count }\n❌ Fallidos: ${ data.failed_count }` );
-        }
+            const res = await fetch(`${API}/bulk-delete`, {
+                method      : 'POST',
+                headers     : { 'Content-Type': 'application/json' },
+                credentials : 'include',
+                body        : JSON.stringify({
+                    repo_names          : repoNames,
+                    delete_all_candidates : false,
+                    confirm             : true
+                })
+            });
 
-        const deletedNames = data.results.filter( ( r: any ) => r.status === 'deleted' ).map( ( r: any ) => r.repo_name );
-        results = results.filter( r => !deletedNames.includes( r.name ) );
+            const data = await res.json();
+
+            if ( !res.ok ) {
+                toast.error( data.detail || 'Error en bulk delete' );
+
+                return;
+            }
+
+            if ( data.failed_count > 0 ) {
+                toast.warning( `✅ Eliminados: ${ data.deleted_count }\n❌ Fallidos: ${ data.failed_count }` );
+            } else {
+                toast.success( `✅ Eliminados: ${ data.deleted_count }\n❌ Fallidos: ${ data.failed_count }` );
+            }
+
+            const deletedNames = data.results.filter( ( r: any ) => r.status === 'deleted' ).map( ( r: any ) => r.repo_name );
+
+            results = results.filter( r => !deletedNames.includes( r.name ) );
         } catch ( e ) {
             toast.error( 'Ocurrió un error inesperado, inténtalo más tarde.' );
         }
@@ -246,11 +279,17 @@
                 <div class="w-24 h-24 mx-auto bg-slate-900/5 dark:bg-white/5 border border-slate-900/10 dark:border-white/10 rounded-full flex items-center justify-center mb-6 glow-effect">
                     <svg class="w-12 h-12 text-emerald-700 dark:text-emerald-400" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
                 </div>
+
                 <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">Autenticación Requerida</h2>
+
                 <p class="text-emerald-700/70 dark:text-emerald-400/70 mb-10 max-w-md mx-auto">
                     EcoSync necesita conectarse a tu cuenta de GitHub de forma segura para analizar tus repositorios en busca de elementos inactivos y medir su impacto residual.
                 </p>
-                <button onclick={connectGithub} class="px-8 py-4 bg-linear-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:scale-105 active:scale-95 transition-all duration-300 glow-effect flex items-center justify-center gap-3 mx-auto shadow-xl">
+
+                <button
+                    onclick = { connectGithub }
+                    class   = "px-8 py-4 bg-linear-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-bold hover:scale-105 active:scale-95 transition-all duration-300 glow-effect flex items-center justify-center gap-3 mx-auto shadow-xl"
+                >
                     Verificar mi GitHub
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                 </button>
