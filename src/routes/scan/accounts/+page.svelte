@@ -1,89 +1,102 @@
 <script lang="ts">
-  import { fade } from 'svelte/transition';
-  import { toast } from 'svelte-sonner';
+    import { fade } from 'svelte/transition';
+    import { toast } from 'svelte-sonner';
+    import { env } from '$env/dynamic/public';
 
-  import { env } from '$env/dynamic/public';
 
-  const API = env.PUBLIC_URL_API;
+    const API = env.PUBLIC_URL_API;
 
-  type OsintState = 'idle' | 'scanning' | 'results';
-  let scanState: OsintState = $state('idle');
-  let username = $state('');
 
-  interface AccountFound {
-    platform: string;
-    profile_url: string;
-    delete_url: string;
-    estimated_co2_grams: number;
-    status: string;
-  }
+    type OsintState = 'idle' | 'scanning' | 'results';
 
-  let results: AccountFound[] = $state([]);
-  let scanStats = $state({ totalAccounts: 0, totalCo2: 0 });
 
-  async function startOsintScan() {
-    const cleanUser = username.trim();
-    if ( !cleanUser || cleanUser.length < 3 ) {
-      toast.warning( "Por favor ingresa un nombre de usuario de al menos 3 caracteres." );
-      return;
+    let scanState: OsintState = $state('idle');
+    let username = $state('');
+    let scanStats = $state({ totalAccounts: 0, totalCo2: 0 });
+    let results: AccountFound[] = $state([]);
+
+
+    interface AccountFound {
+        platform            : string;
+        profile_url         : string;
+        delete_url          : string;
+        estimated_co2_grams : number;
+        status              : string;
     }
 
-    scanState = 'scanning';
-    results = [];
 
-    try {
-      const res = await fetch(`${API}/osint/scan?username=${encodeURIComponent(cleanUser)}`);
-      if (!res.ok) throw new Error('Failed to scan OSINT');
-      
-      const data = await res.json();
-      results = data.platforms || [];
-      
-      scanStats = {
-        totalAccounts: data.accounts_found,
-        totalCo2: data.total_co2_grams
-      };
+    async function startOsintScan() {
+        const cleanUser = username.trim();
 
-      // Guardar en localStorage para Dashboard
-      const scanData = {
-        id: 'scan-' + Date.now(),
-        user_id: cleanUser,
-        scan_date: new Date().toISOString(),
-        total_files: 0,
-        total_size_gb: 0,
-        waste_files: data.accounts_found,
-        waste_size_gb: 0,
-        co2_saved_estimate_g: data.total_co2_grams,
-        source_type: 'osint',
-        created_at: new Date().toISOString()
-      };
-      const history = JSON.parse(localStorage.getItem('ecoSyncScans') || '[]');
-      history.unshift(scanData);
-      localStorage.setItem('ecoSyncScans', JSON.stringify(history));
+        if ( !cleanUser || cleanUser.length < 3 ) {
+            toast.warning( "Por favor ingresa un nombre de usuario de al menos 3 caracteres." );
+            return;
+        }
 
-      scanState = 'results';
-    } catch ( e ) {
-      console.error( e );
-      toast.error( 'Hubo un error contactando al servidor.' );
-      scanState = 'idle';
+        scanState = 'scanning';
+        results = [];
+
+        try {
+            const res = await fetch(`${API}/osint/scan?username=${encodeURIComponent(cleanUser)}`);
+
+            if ( !res.ok ) {
+                toast.error( 'Hubo un error contactando al servidor.' );
+            }
+
+            const data = await res.json();
+
+            results = data.platforms || [];
+
+            scanStats = {
+                totalAccounts   : data.accounts_found,
+                totalCo2        : data.total_co2_grams
+            };
+
+            // Guardar en localStorage para Dashboard
+            const scanData = {
+                id                      : 'scan-' + Date.now(),
+                user_id                 : cleanUser,
+                scan_date               : new Date().toISOString(),
+                total_files             : 0,
+                total_size_gb           : 0,
+                waste_files             : data.accounts_found,
+                waste_size_gb           : 0,
+                co2_saved_estimate_g    : data.total_co2_grams,
+                source_type             : 'osint',
+                created_at              : new Date().toISOString()
+            };
+
+            const history = JSON.parse( localStorage.getItem( 'ecoSyncScans' ) || '[]' );
+
+            history.unshift( scanData );
+
+            localStorage.setItem( 'ecoSyncScans', JSON.stringify( history ));
+
+            scanState = 'results';
+        } catch ( e ) {
+            toast.error( 'Hubo un error contactando al servidor.' );
+            scanState = 'idle';
+        }
     }
-  }
 
-  function getPlatformIcon(platform: string) {
-    const p = platform.toLowerCase();
-    if (p.includes('github') || p.includes('gitlab') || p.includes('bitbucket')) return '💻';
-    if (p.includes('reddit') || p.includes('hackernews') || p.includes('dev.to')) return '💬';
-    if (p.includes('twitter') || p.includes('instagram') || p.includes('pinterest') || p.includes('flickr') || p.includes('deviantart')) return '📸';
-    if (p.includes('spotify') || p.includes('soundcloud') || p.includes('vimeo')) return '🎵';
-    if (p.includes('blogger') || p.includes('medium') || p.includes('wattpad')) return '✍️';
-    if (p.includes('patreon')) return '💳';
-    return '🌐';
-  }
+
+    function getPlatformIcon( platform: string ): "💻" | "💬" | "📸" | "🎵" | "✍️" | "💳" | "🌐" {
+        const p = platform.toLowerCase();
+
+        if (p.includes('github') || p.includes('gitlab') || p.includes('bitbucket')) return '💻';
+        if (p.includes('reddit') || p.includes('hackernews') || p.includes('dev.to')) return '💬';
+        if (p.includes('twitter') || p.includes('instagram') || p.includes('pinterest') || p.includes('flickr') || p.includes('deviantart')) return '📸';
+        if (p.includes('spotify') || p.includes('soundcloud') || p.includes('vimeo')) return '🎵';
+        if (p.includes('blogger') || p.includes('medium') || p.includes('wattpad')) return '✍️';
+        if (p.includes('patreon')) return '💳';
+
+        return '🌐';
+    }
 </script>
 
 <div class="w-full" transition:fade>
     <!-- Tarjeta Principal del Scanner usando Glass-effect -->
     <div class="glass-effect rounded-2xl p-6 md:p-10 relative overflow-hidden">
-        
         {#if scanState === 'idle'}
             <div class="text-center py-12 px-4 max-w-2xl mx-auto" transition:fade>
                 <div class="w-24 h-24 mx-auto bg-purple-500/10 border border-purple-500/20 rounded-full flex items-center justify-center mb-6 glow-effect shadow-[0_0_30px_rgba(168,85,247,0.3)]">
