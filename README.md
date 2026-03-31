@@ -1,47 +1,75 @@
-# Svelte + TS + Vite
+# 🌿 EcoSync
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+**EcoSync** es una plataforma integral diseñada para combatir la contaminación digital invisible. Nuestra aplicación escanea tu huella a través de múltiples entornos y servicios (Google Drive, GitHub, Almacenamiento Local de tu PC y Cuentas Fantasmas vía OSINT), detectando basura residual, archivos "muertos", repositorios archivados y recursos duplicados. 
 
-## Recommended IDE Setup
+EcoSync no solo te permite limpiar estos archivos para recuperar espacio de almacenamiento masivo, sino que estima con precisión el **CO₂ potencial al año** que ahorras al reducir la constante demanda energética y de enfriamiento que exiges a los gigantescos data centers globales.
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+---
 
-## Need an official Svelte framework?
+## 🎯 Nuestra Misión y Visión
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+### 🚀 Misión
+Capacitar y empoderar a los usuarios de tecnología sobre el impacto medioambiental que genera el almacenamiento en la nube y la retención de datos inútiles. Proveemos herramientas intuitivas y seguras para localizar y erradicar la "basura digital", reduciendo así, de forma proactiva, nuestra huella de carbono digital tanto a nivel personal como empresarial.
 
-## Technical considerations
+### 🔭 Visión
+Convertirnos en el estándar definitivo para el mantenimiento y concientización ecológica de datos a nivel mundial. Visualizamos un internet más liviano, ordenado y sostenible, donde la innovación digital avance en perfecta armonía con la preservación de nuestro planeta.
 
-**Why use this over SvelteKit?**
+---
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+## ⚙️ ¿Cómo funciona y cómo se usa?
 
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+La plataforma está diseñada con una interfaz minimalista, moderna (*Glassmorphism*) e intuitiva. Consta de cuatro fases:
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+1. **Autenticación y Reglas de Escaneo:** Seleccionas un módulo (Drive, Github, PC Local o Cuentas). Según lo requerido, EcoSync solicitará permisos temporales seguros (OAuth) o parámetros de usuario a escanear.
+2. **Análisis de Impacto:** Nuestro motor clasifica los tiempos de inactividad, detecta repositorios "zombies" (Forks abandonados), cachés residuales y busca tus rastros en docenas de plataformas obsoletas.
+3. **Métricas Ecológicas en la Vida Real:** Antes de eliminar, accederás a un *"Dashboard"* dinámico. Verás conversiones reales de la energía que malgastan tus archivos inactivos métricas comprensibles (Ej. horas de bombilla LED encendidas sin límite, cantidad de árboles requeridos para absorber tu excedente).
+4. **Limpieza Inteligente y Segura:** Mediante nuestra ventana de revisión, puedes seleccionar múltiples elementos obsoletos. Podrás decidir si delegar el envío a una "papelera transitoria", o desencadenar una destrucción total. ¡Cada limpieza actualiza tu récord de mitigación climática!
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
+---
 
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
+## 💻 Guía de Instalación Local
 
-**Why include `.vscode/extensions.json`?**
+Para correr **EcoSync-Front** en tu servidor local de pruebas, necesitarás tener instalado [Node.js](https://nodejs.org) (versión 18 o superior recomendada).
 
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
+### Paso a paso:
 
-**Why enable `allowJs` in the TS template?**
-
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
-
-**Why is HMR not preserving my local component state?**
-
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
+**1. Clonar el repositorio**
+Abre una terminal y clona este proyecto a tu entorno local:
+```bash
+git clone https://github.com/TuUsuario/EcoSync-Front.git
+cd EcoSync-Front
 ```
+
+**2. Instalar las dependencias**
+Instala los paquetes (SvelteKit, Tailwind, Sonner, etc.) mediante NPM:
+```bash
+npm install
+```
+
+**3. Configurar Variables de Entorno**
+En la raíz de tu proyecto, existe (o deberás crear) un archivo `.env`. Este debe contener la dirección que apunta a tu *backend* (API de Python/Node que maneja la lógica de procesamiento) para que se logre una conexión exitosa:
+```env
+PUBLIC_URL_API="http://localhost:8000" # URL donde escuches la API de tu EcoSync-Backend
+```
+
+**4. Levantar el entorno de Desarrollo**
+Ejecuta Vite y SvelteKit para correr el Frontend con `Hot Module Replacement` (HMR):
+```bash
+npm run dev
+```
+
+**5. Uso Inicial / Primera Ejecución**
+Abre tu navegador web y dirígete a `http://localhost:5173`. Navegando por la plataforma, usa el menú principal para ir probando los componentes de escaneo. Asegúrate de que el Backend general también esté operando paralelamente.
+
+---
+
+## 🛠 Stack Tecnológico y UI
+* **Svelte 5 / SvelteKit:** Potencia un renderizado hiper-rápido optimizado bajo la nueva estructura y paradigma de "Runes" (`$state`, `$derived`, `@render`).
+* **Tailwind CSS:** Experiencia de UI responsiva y nativamente empaquetada con compatibilidad total en `Dark Mode`, asegurando bajo consumo de poder luminoso si se visualiza en pantallas OLED.
+* **Componentes Custom:** Sistema de alertas asíncronas optimizadas y UI de Dialogs con fondos reactivos borrosos.
+
+---
+
+<p align="center">
+  <i>Desarrollado con el objetivo de restaurar el balance natural de nuestra nube pública.</i>
+</p>
